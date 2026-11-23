@@ -16,8 +16,9 @@ Config file: `.claude/publish-whats-new.json` in the target repo. Schema and pre
    - Tag style: auto (default: detect from repo tags, fallback vX.Y.Z) / `vX.Y.Z` / `vX.YY.ZZ` / timestamp / custom regex
    - Sections: non-tech "What's new", tech notes, developer notes (multi-select)
    - Publish target: GitHub release / tag only / notes only (print)
+   - Version bump: ask yes/no whether manifests also get bumped on release. If yes, which files: manifests to bump (e.g. `package.json`, `.claude-plugin/plugin.json`, `Cargo.toml`, `pyproject.toml`). Offer ones found in the repo. Default: no bump.
    - Excludes: files/paths to leave out of the diff (globs or regexes) and commit subjects to ignore (regex). Offer quick picks inferred from the repo (look at its top-level dirs and files), e.g. docs (`*.md`, `docs/`), tests (`*.test.*`, `*.spec.*`, `tests/`), lockfiles, generated code, snapshots, `chore|ci|test` commits. Only suggest what exists in this repo. Multi-select plus "Other" for custom globs/regexes. "None" is valid.
-   Sort answers: path globs → `diff.exclude`, path regexes → `diff.excludeRegex`, commit regexes → `log.excludeRegex`. Write config from answers using presets in `config-reference.md`, show it, then continue. Config is a repo file: tell user to commit it. Do not commit for them.
+   Sort answers: version bump answer → `versionBump.enabled` + `versionBump.files`, path globs → `diff.exclude`, path regexes → `diff.excludeRegex`, commit regexes → `log.excludeRegex`. Write config from answers using presets in `config-reference.md`, show it, then continue. Config is a repo file: tell user to commit it. Do not commit for them.
 3. **Present:** validate against schema. Unknown/invalid field → stop, report which.
 4. Per-run override: if user's request states a version, section choice, etc., it beats config for this run only.
 
@@ -110,9 +111,35 @@ If only `whats-new` enabled, no developer content may leak in (no hashes, no fil
 
 ## Step 5 — Confirm (if configured)
 
-`publish.confirm: true` (default) → show tag, previous tag, commit count and the notes, ask go/no-go before publishing. `false` → user's request is the go-ahead; proceed.
+`publish.confirm: true` (default) → show tag, previous tag, commit count, the notes and planned version-file edits (if any), ask go/no-go before publishing. `false` → user's request is the go-ahead; proceed.
 
-## Step 6 — Publish
+## Step 6 — Bump version files (optional)
+
+Runs only if `versionBump.enabled` is true (default: true when `versionBump.files` is non-empty, false otherwise). Skip entirely otherwise. A per-run request like "release without bumping" or "also bump the manifest" overrides the config for this run only. Applies to `github-release` and `tag-only` targets only (not `notes-only` / `file`).
+
+Version string written = new tag with `versionBump.strip` removed from the front (default `v`: `v0.1.1` → `0.1.1`). Timestamp or custom tags: use `versionBump.strip` or `versionBump.template` (e.g. `{version}`) to shape it.
+
+Preconditions, all required, else stop and report (no partial edits):
+- Current branch is `<baseBranch>`, working tree clean for the listed files, and `HEAD` equals `<remote>/<baseBranch>` (after fetch). No unpushed or behind commits.
+
+For each entry in `versionBump.files`:
+- `{ "path": "...", "key": "a.b" }`: JSON file, set dotted key. Edit only that value; keep formatting and key order (targeted text edit, not a re-serialize).
+- `{ "path": "...", "pattern": "<ERE with one capture group>" }`: any text file (TOML, YAML, `package.json`, `Cargo.toml`, ...). Replace the captured group only. Pattern must match exactly once, else stop.
+- Value already equals the new version → skip that file.
+
+Then:
+```bash
+git add <files>
+git commit -m "<versionBump.commitMessage>"   # default: chore: bump version to {version}
+git push <remote> <baseBranch>
+```
+- Rejected push (protected branch, race) → stop, report, leave the local commit for the user. Do not force-push, open PRs or retry elsewhere.
+- Re-fetch; the release now targets the new branch tip. Commit exists, so add it to developer notes `Changes` (hash + subject) if that section is enabled, and update the commit count.
+- Never touch files not listed in `versionBump.files`.
+
+Show planned edits (file, old → new) in Step 5's confirm when the bump runs. The bump happens after that go-ahead.
+
+## Step 7 — Publish
 
 By `publish.target`:
 
@@ -125,14 +152,14 @@ By `publish.target`:
 - `notes-only`: print notes, publish nothing, create no tag.
 - `file`: write notes to `publish.file` path (supports `{version}`), no tag. Tell user; do not commit.
 
-## Step 7 — Verify and report
+## Step 8 — Verify and report
 
 `gh release view <version>` (github-release) or `git ls-remote --tags <remote> <version>` (tag-only). Report: URL/tag, previous tag, commit count, and the user-facing section(s) of the notes.
 
 ## Guardrails
 
 - Never force-push, delete, or move existing tags.
-- Never edit repo files or commit, except writing the config on first-run setup (and only that file).
+- Never edit repo files or commit, except: (a) writing the config on first-run setup (that file only), (b) the Step 6 version bump (listed files only, one commit, plain push).
 - Tag origin/remote branch tip, not local HEAD.
 - `gh` unauthenticated → tell user to run `! gh auth login`.
 - Config disagrees with user's explicit request → follow request, note the deviation.

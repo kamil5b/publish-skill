@@ -18,6 +18,15 @@ Values are illustrative. Excludes default to empty; first-run setup asks what to
     "exclude": ["*.md", "*.csv", "*.test.*", "*.spec.*"],
     "excludeRegex": ["^docs/", "\\.generated\\."]
   },
+  "versionBump": {
+    "enabled": true,
+    "files": [
+      { "path": ".claude-plugin/plugin.json", "key": "version" },
+      { "path": "pyproject.toml", "pattern": "^version = \"([^\"]+)\"" }
+    ],
+    "strip": "v",
+    "commitMessage": "chore: bump version to {version}"
+  },
   "log": {
     "excludeRegex": ["^(chore|ci|test)(\\(.+\\))?:"]
   },
@@ -62,6 +71,11 @@ Values are illustrative. Excludes default to empty; first-run setup asks what to
 | `diff.command` | null | Custom diff script. Placeholders `{from}` `{to}` `{out}`. |
 | `diff.exclude` | `[]` | Pathspec globs excluded from diff. |
 | `diff.excludeRegex` | `[]` | ERE regexes on repo-relative file paths; matches are excluded from diff. Combined with `exclude`. |
+| `versionBump.enabled` | auto | Toggle the manifest bump. Default `true` if `files` is non-empty, else `false`. Set `false` to keep the file list but skip the bump. Per-run override: ask for "release without bumping". |
+| `versionBump.files` | `[]` | Manifests to update at release. `{path, key}` for JSON (dotted key) or `{path, pattern}` with an ERE and one capture group (replaced). Empty = nothing to bump. |
+| `versionBump.strip` | `v` | Prefix removed from the tag to get the file version (`v0.1.1` → `0.1.1`). |
+| `versionBump.template` | `{version}` | Shape for non-semver tags. |
+| `versionBump.commitMessage` | `chore: bump version to {version}` | One commit, plain push to `baseBranch`. Stops if branch is protected or not in sync. |
 | `log.excludeRegex` | `[]` | ERE regexes (case-insensitive) on commit subjects; matches are dropped from the changelog input. |
 | `notes.language` | null | null = match user's request language. |
 | `notes.sections[]` | whats-new + developer-notes | Order = output order. `kind`: `whats-new`, `tech-summary`, `developer-notes`, `custom` (needs `prompt`). Optional `style`, `maxItems`. |
