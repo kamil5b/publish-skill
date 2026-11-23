@@ -1,0 +1,11 @@
+{
+  "name": "publish-skill",
+  "owner": { "name": "kamil5b" },
+  "plugins": [
+    {
+      "name": "publish-whats-new",
+      "source": "./",
+      "description": "Publish a release with a configurable What's new changelog."
+    }
+  ]
+}
