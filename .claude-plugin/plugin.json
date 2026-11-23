@@ -2,6 +2,20 @@
   "name": "publish-whats-new",
   "description": "Publish a release with a configurable What's new changelog: auto-detected tag style, per-audience sections, GitHub release or tag-only.",
   "version": "0.1.2",
-  "author": { "name": "kamil5b" },
-  "keywords": ["release", "changelog", "whats-new", "tags"]
+  "author": {
+    "name": "kamil5b"
+  },
+  "keywords": [
+    "release",
+    "changelog",
+    "whats-new",
+    "tags"
+  ],
+  "homepage": "https://github.com/kamil5b/publish-skill",
+  "repository": "https://github.com/kamil5b/publish-skill",
+  "documentationUrl": "https://github.com/kamil5b/publish-skill/blob/main/README.md",
+  "supportUrl": "https://github.com/kamil5b/publish-skill/issues",
+  "privacyPolicyUrl": "https://github.com/kamil5b/publish-skill/blob/main/PRIVACY.md",
+  "termsOfServiceUrl": "https://github.com/kamil5b/publish-skill/blob/main/LICENSE",
+  "license": "MIT"
 }
