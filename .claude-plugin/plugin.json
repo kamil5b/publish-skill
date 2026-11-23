@@ -1,7 +1,7 @@
 {
   "name": "publish-whats-new",
   "description": "Publish a release with a configurable What's new changelog: auto-detected tag style, per-audience sections, GitHub release or tag-only.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": { "name": "kamil5b" },
   "keywords": ["release", "changelog", "whats-new", "tags"]
 }
