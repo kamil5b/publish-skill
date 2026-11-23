@@ -1,0 +1,44 @@
+{
+  "remote": "origin",
+  "baseBranch": "main",
+  "tag": {
+    "style": "auto"
+  },
+  "diff": {
+    "exclude": [],
+    "excludeRegex": []
+  },
+  "log": {
+    "excludeRegex": []
+  },
+  "notes": {
+    "sections": [
+      {
+        "kind": "whats-new",
+        "enabled": true,
+        "title": "What's new"
+      },
+      {
+        "kind": "developer-notes",
+        "enabled": true,
+        "title": "Developer notes"
+      }
+    ]
+  },
+  "publish": {
+    "target": "github-release",
+    "confirm": true,
+    "title": "{version}"
+  },
+  "versionBump": {
+    "enabled": true,
+    "files": [
+      {
+        "path": ".claude-plugin/plugin.json",
+        "key": "version"
+      }
+    ],
+    "strip": "v",
+    "commitMessage": "chore: bump version to {version}"
+  }
+}
