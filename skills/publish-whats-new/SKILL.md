@@ -60,11 +60,11 @@ Previous tag: latest tag matching style pattern, ordered by `tag.sort`.
 
 - New tag already exists → stop, report.
 - Version-sorted style and new version <= latest → stop and ask.
-- No previous tag → range starts at first commit (`git rev-list --max-parents=0 <remote>/<baseBranch>`).
+- No previous tag → first release. Log range is the whole history (`<remote>/<baseBranch>`, no `..`). Diff `<from>` is the empty tree (`git hash-object -t tree /dev/null`), so the root commit is included. Do not use the root commit as `<from>`: that drops it.
 
 ## Step 3 — Collect changes
 
-Range: `<prev-tag>..<remote>/<baseBranch>`.
+Range: `<prev-tag>..<remote>/<baseBranch>`, or the whole history on a first release (see Step 2).
 
 ```bash
 git log --no-merges --pretty='%h %s' <range>
