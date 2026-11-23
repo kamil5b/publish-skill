@@ -1,5 +1,6 @@
 {
   "name": "publish-skill",
+  "description": "Skills for publishing releases with a configurable What's new changelog.",
   "owner": { "name": "kamil5b" },
   "plugins": [
     {
